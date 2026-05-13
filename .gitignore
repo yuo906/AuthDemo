@@ -12,3 +12,4 @@ obj/
 publish/
 
 appsettings.Development.json
+docker-compose.yml
