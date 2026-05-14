@@ -49,4 +49,38 @@ public class JwtService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!);
+
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true, // 驗證 Audience
+            ValidateIssuer = true,  // 驗證 Issuer
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = false, // 允許過期 Token
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidAudience = _configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var principal = tokenHandler.ValidateToken(
+            token, 
+            tokenValidationParameters, 
+            out SecurityToken securityToken
+        );
+
+        var jwtSecurityToken = securityToken as JwtSecurityToken;
+
+        if (jwtSecurityToken == null ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new SecurityTokenException("Invalid token");
+        }
+
+        return principal;
+    }
 }

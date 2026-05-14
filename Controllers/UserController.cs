@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AuthDemo.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
